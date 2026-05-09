@@ -12,7 +12,7 @@ A production-ready Flutter Task Manager application with Firebase Authentication
 
 ### ✅ Task Management (CRUD)
 - Add, edit, delete tasks
-- Mark tasks as completed/pending
+- Mark tasks as completed (permanent action)
 - Real-time Firestore sync (stream-based)
 - Task filtering: All / Completed / Pending
 - Swipe-to-delete with confirmation
@@ -20,8 +20,9 @@ A production-ready Flutter Task Manager application with Firebase Authentication
 
 ### 💬 Motivational Quotes
 - Random quotes from Quotable API
+- Cache-busting logic for fresh quotes on reload
 - Fallback to ZenQuotes API
-- Hardcoded fallback for offline mode
+- Randomized hardcoded fallback for offline mode
 - Tap-to-refresh functionality
 
 ### 🎨 UI/UX
@@ -48,66 +49,21 @@ A production-ready Flutter Task Manager application with Firebase Authentication
 | flutter_animate | Micro-animations |
 | Shimmer | Loading placeholders |
 
-## Architecture
+## Architecture (Simplified Flat Structure)
+
+The project follows a simplified, flat directory structure as per internship requirements:
 
 ```
 lib/
-├── core/
-│   ├── constants/
-│   │   ├── app_constants.dart
-│   │   └── app_strings.dart
-│   ├── theme/
-│   │   ├── app_colors.dart
-│   │   ├── app_theme.dart
-│   │   └── theme_provider.dart
-│   ├── utils/
-│   │   ├── date_helper.dart
-│   │   ├── firebase_error_handler.dart
-│   │   ├── snackbar_helper.dart
-│   │   └── validators.dart
-│   └── widgets/
-│       ├── custom_text_field.dart
-│       ├── empty_state.dart
-│       ├── primary_button.dart
-│       └── shimmer_loading.dart
-│
-├── features/
-│   ├── auth/
-│   │   ├── models/
-│   │   │   └── user_model.dart
-│   │   ├── services/
-│   │   │   └── auth_service.dart
-│   │   ├── providers/
-│   │   │   └── auth_provider.dart
-│   │   └── screens/
-│   │       ├── login_screen.dart
-│   │       └── signup_screen.dart
-│   │
-│   ├── tasks/
-│   │   ├── models/
-│   │   │   └── task_model.dart
-│   │   ├── services/
-│   │   │   └── task_service.dart
-│   │   ├── providers/
-│   │   │   └── task_provider.dart
-│   │   ├── screens/
-│   │   │   └── home_screen.dart
-│   │   └── widgets/
-│   │       ├── quote_card.dart
-│   │       ├── task_card.dart
-│   │       ├── task_filter_bar.dart
-│   │       ├── task_form_sheet.dart
-│   │       └── task_stats_bar.dart
-│   │
-│   └── quotes/
-│       ├── models/
-│       │   └── quote_model.dart
-│       ├── services/
-│       │   └── quote_service.dart
-│       └── providers/
-│           └── quote_provider.dart
-│
-└── main.dart
+├── constants/      # App strings and constants
+├── models/         # Data models (Task, User, Quote)
+├── providers/      # State management (ChangeNotifiers)
+├── screens/        # UI Screens (Login, Signup, Home)
+├── services/       # Backend & API logic
+├── theme/          # Styling and Colors
+├── utils/          # Helper classes and logic
+├── widgets/        # Reusable UI components
+└── main.dart       # App entry point
 ```
 
 ## Firebase Setup (Step-by-Step)
@@ -147,10 +103,10 @@ flutterfire configure --project=YOUR_PROJECT_ID
 This will:
 - Register your app with Firebase
 - Generate `lib/firebase_options.dart`
-- Update `android/app/build.gradle.kts` with the google-services plugin
+- Update `android/app/build.gradle` with the google-services plugin
 
 ### Step 5: Update main.dart
-After running `flutterfire configure`, update the Firebase initialization in `main.dart`:
+After running `flutterfire configure`, ensure your `main.dart` is correctly initializing Firebase:
 
 ```dart
 import 'firebase_options.dart';
@@ -164,18 +120,6 @@ void main() async {
 }
 ```
 
-### Step 6: Firestore Security Rules (Production)
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/tasks/{taskId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
-
 ## Running the App
 
 ```bash
@@ -184,9 +128,6 @@ flutter pub get
 
 # Run in debug mode
 flutter run
-
-# Run on specific device
-flutter run -d <device_id>
 ```
 
 ## Building APK
@@ -201,26 +142,7 @@ flutter build apk --debug
 flutter build apk --release
 ```
 
-### Split APKs (smaller size)
-```bash
-flutter build apk --split-per-abi
-```
-
 APK output location: `build/app/outputs/flutter-apk/`
-
-## Firestore Data Structure
-
-```
-users/
-  └── {userId}/
-       └── tasks/
-            └── {taskId}/
-                 ├── title: String
-                 ├── description: String
-                 ├── date: Timestamp
-                 ├── status: String ("pending" | "completed")
-                 └── createdAt: Timestamp
-```
 
 ## State Management
 
@@ -232,29 +154,6 @@ Uses **Provider** with `ChangeNotifier`:
 | `TaskProvider` | CRUD operations, filtering, real-time sync |
 | `QuoteProvider` | Fetch/refresh motivational quotes |
 | `ThemeProvider` | Dark/light mode toggling |
-
-## API Integration
-
-- **Primary**: `https://api.quotable.io/random`
-- **Fallback**: `https://zenquotes.io/api/random`
-- **Safety net**: Hardcoded fallback quote
-
-## Demo Video Script
-
-1. **Splash Screen** → App launches with TaskFlow branding
-2. **Signup** → Create new account with name, email, password
-3. **Home Dashboard** → Quote card, stats bar, empty state
-4. **Add Task** → Tap FAB → Fill form → Save
-5. **Task List** → Multiple tasks with dates and status
-6. **Complete Task** → Tap checkbox → Status updates
-7. **Edit Task** → Tap card → Edit form → Save
-8. **Delete Task** → Swipe left → Confirm delete
-9. **Filter Tasks** → All / Pending / Completed tabs
-10. **Pull to Refresh** → Refresh tasks and quote
-11. **Dark Mode** → Toggle theme from app bar
-12. **Logout** → Confirm dialog → Redirect to login
-13. **Login** → Re-login with existing credentials
-14. **Persistent Session** → Close/reopen app → Still logged in
 
 ## License
 
