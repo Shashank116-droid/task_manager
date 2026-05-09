@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:task_manager/features/quotes/services/quote_service.dart';
+import 'package:task_manager/services/quote_service.dart';
 
 void main() {
   test('returns quote from primary API when it succeeds', () async {

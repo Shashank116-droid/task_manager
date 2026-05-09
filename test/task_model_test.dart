@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:task_manager/core/constants/app_constants.dart';
-import 'package:task_manager/features/tasks/models/task_model.dart';
+import 'package:task_manager/constants/app_constants.dart';
+import 'package:task_manager/models/task_model.dart';
 
 void main() {
   test('toFirestore stores Firestore-compatible fields', () {
